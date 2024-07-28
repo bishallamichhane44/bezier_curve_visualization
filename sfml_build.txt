@@ -1,0 +1,10 @@
+SFMKL build command:
+g++ -IC:\SFML-2.6.0\include -c main.cpp -o main.o
+
+
+g++ -LC:\SFML-2.6.0\lib .\main.o -o main.exe -lmingw32 -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system -lsfml-main -mwindows
+
+
+//sample
+void renderCurveSegment(sf::VertexArray& controlPoints, float progress, sf::Color curveColor, 
+                        std::vector<sf::CircleShape>& trailMarkers, sf::RenderWindow& display);

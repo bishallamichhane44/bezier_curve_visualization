@@ -1,0 +1,6 @@
+1.choose control points
+2.Press enter 
+3.Hold D and choose a control point to change it's position
+4.Press enter to draw again
+5.Press R to reset
+7.Press U to undo last curve (experimental)
