@@ -199,6 +199,8 @@ int main()
     float animationProgress = 0.0f;
     sf::Clock animationTimer;
     bool isDrawingCurve = false;
+    bool isPaused = false;  // Variable to track pause state
+    sf::Time pausedTime = sf::Time::Zero;  // Time accumulated while paused
 
     sf::Color canvasBackground = convertHexToRGB("1A1A2E");
     sf::Color controlPointColor = convertHexToRGB("FF6B6B");
@@ -251,6 +253,8 @@ int main()
                     animationTimer.restart();
                     animationProgress = 0.0f;
                     generatedCurves.push_back(controlPoints);
+                    isPaused = false;
+                    pausedTime = sf::Time::Zero;
                 }
                 if (canvasEvent.key.code == sf::Keyboard::R)
                 {
@@ -283,6 +287,20 @@ int main()
                         generatedCurves.pop_back();
                     }
                 }
+                if (canvasEvent.key.code == sf::Keyboard::P)
+                {
+                    // Toggle pause state when 'P' is pressed
+                    isPaused = !isPaused;
+                    if (isPaused)
+                    {
+                        pausedTime = animationTimer.getElapsedTime();
+                    }
+                    else
+                    {
+                        animationTimer.restart();
+                        animationTimer.restart();
+                    }
+                }
             }
         }
 
@@ -299,10 +317,15 @@ int main()
         if (isDrawingCurve && controlPoints.getVertexCount() > 1)
         {
             renderCurveSegment(controlPoints, animationProgress, curveColor, trailMarkers, canvas);
-            if (animationTimer.getElapsedTime().asMilliseconds() >= 10 && animationProgress < 1.0f)
+            if (!isPaused)
             {
-                animationProgress += 0.01f;
-                animationTimer.restart();
+                sf::Time elapsedTime = animationTimer.getElapsedTime() + pausedTime;
+                if (elapsedTime.asMilliseconds() >= 10 && animationProgress < 1.0f)
+                {
+                    animationProgress += 0.01f;
+                    pausedTime = sf::Time::Zero;
+                    animationTimer.restart();
+                }
             }
         }
 
