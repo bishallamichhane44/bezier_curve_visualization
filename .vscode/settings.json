@@ -60,6 +60,9 @@
     "*.md": "cpp",
     "deque": "cpp",
     "string": "cpp",
-    "vector": "cpp"
+    "vector": "cpp",
+    "*.tcc": "cpp",
+    "unordered_map": "cpp",
+    "system_error": "cpp"
   }
 }

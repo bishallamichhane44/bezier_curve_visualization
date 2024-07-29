@@ -1,5 +1,6 @@
 #include "curveutils.hpp"
 #include <SFML/Graphics.hpp>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <cmath>
@@ -199,8 +200,12 @@ int main()
     float animationProgress = 0.0f;
     sf::Clock animationTimer;
     bool isDrawingCurve = false;
-    bool isPaused = false;  // Variable to track pause state
-    sf::Time pausedTime = sf::Time::Zero;  // Time accumulated while paused
+    bool isPaused = false;
+    sf::Time pausedTime = sf::Time::Zero;
+
+    const float DEFAULT_SPEED = 0.01f;
+    float speedMultiplier = 1.0f;
+    float currentSpeed = DEFAULT_SPEED;
 
     sf::Color canvasBackground = convertHexToRGB("1A1A2E");
     sf::Color controlPointColor = convertHexToRGB("FF6B6B");
@@ -212,6 +217,23 @@ int main()
     sf::CircleShape pointerIndicator(5.0f);
     pointerIndicator.setFillColor(pointerColor);
     pointerIndicator.setOrigin(5.0f, 5.0f);
+
+    // Font for displaying speed
+    sf::Font font;
+    if (!font.loadFromFile("arial-font/arial.ttf")) // Make sure you have this font file or change to an available font
+    {
+        std::cout << "Failed to load font" << std::endl;
+        return -1;
+    }
+
+    sf::Text speedText;
+    speedText.setFont(font);
+    speedText.setCharacterSize(24);
+    speedText.setFillColor(convertHexToRGB("4ECCA3")); // Using the curveColor
+    speedText.setStyle(sf::Text::Bold);
+    speedText.setOutlineColor(convertHexToRGB("1A1A2E")); // Using the canvasBackground color
+    speedText.setOutlineThickness(2.0f);
+    speedText.setPosition(20, 20);
 
     while (canvas.isOpen())
     {
@@ -247,7 +269,7 @@ int main()
             }
             if (canvasEvent.type == sf::Event::KeyPressed)
             {
-                if (canvasEvent.key.code == sf::Keyboard::Enter)
+                 if (canvasEvent.key.code == sf::Keyboard::Enter)
                 {
                     isDrawingCurve = true;
                     animationTimer.restart();
@@ -264,6 +286,8 @@ int main()
                     isDrawingCurve = false;
                     animationProgress = 0.0f;
                     activeControlPoint = -1;
+                    speedMultiplier = 1.0f;
+                    currentSpeed = DEFAULT_SPEED;
                 }
                 if (canvasEvent.key.code == sf::Keyboard::D)
                 {
@@ -289,7 +313,6 @@ int main()
                 }
                 if (canvasEvent.key.code == sf::Keyboard::P)
                 {
-                    // Toggle pause state when 'P' is pressed
                     isPaused = !isPaused;
                     if (isPaused)
                     {
@@ -298,8 +321,17 @@ int main()
                     else
                     {
                         animationTimer.restart();
-                        animationTimer.restart();
                     }
+                }
+                if (canvasEvent.key.code == sf::Keyboard::RBracket)
+                {
+                    speedMultiplier *= 1.1f; // Increase speed by 10%
+                    currentSpeed = DEFAULT_SPEED * speedMultiplier;
+                }
+                if (canvasEvent.key.code == sf::Keyboard::LBracket)
+                {
+                    speedMultiplier *= 0.9f; // Decrease speed by 10%
+                    currentSpeed = DEFAULT_SPEED * speedMultiplier;
                 }
             }
         }
@@ -322,7 +354,7 @@ int main()
                 sf::Time elapsedTime = animationTimer.getElapsedTime() + pausedTime;
                 if (elapsedTime.asMilliseconds() >= 10 && animationProgress < 1.0f)
                 {
-                    animationProgress += 0.01f;
+                    animationProgress += currentSpeed;
                     pausedTime = sf::Time::Zero;
                     animationTimer.restart();
                 }
@@ -335,6 +367,12 @@ int main()
         }
 
         canvas.draw(pointerIndicator);
+
+        // Update and draw speed text
+        std::ostringstream speedStream;
+        speedStream << "Speed: " << std::fixed << std::setprecision(2) << speedMultiplier << "x";
+        speedText.setString(speedStream.str());
+        canvas.draw(speedText);
 
         canvas.display();
     }
